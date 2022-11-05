@@ -3,6 +3,7 @@ session_config:
   session_expiration_time: 0.0
   carry_over_slots_to_new_session: true
 intents:
+- name
 - greet
 - goodbye
 - bot_challenge
@@ -143,6 +144,8 @@ slots:
     - type: from_entity
       entity: handoff_to
 responses:
+  utter_name:
+  - text: MY NAME IS RASABOT
   utter_out_of_scope:
   - text: Sorry, I'm not sure how to respond to that. Type "help" for assistance.
   utter_greet:

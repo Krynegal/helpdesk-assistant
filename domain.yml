@@ -25,19 +25,9 @@ intents:
 entities:
 - email
 - priority
-#- stand
+- stand
 - handoff_to
 slots:
-#  stand:
-#    type: text
-#    influence_conversation: false
-#    mappings:
-#      - type: from_entity
-#        entity: stand
-#        conditions:
-#          - active_loop: open_incident_form
-#      - type: from_entity
-#        entity: stand
   confirm:
     type: bool
     influence_conversation: false
@@ -129,6 +119,16 @@ slots:
       - active_loop: open_incident_form
     - type: from_entity
       entity: priority
+  stand:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: stand
+        conditions:
+          - active_loop: open_incident_form
+      - type: from_entity
+        entity: stand
   problem_description:
     type: text
     influence_conversation: false
@@ -155,7 +155,7 @@ slots:
     - type: from_entity
       entity: handoff_to
 responses:
-  utter_stand_troubles:
+  utter_ask_stand:
     - text: Which stand is the problem with?
       buttons:
         - payload: /inform{"stand":"ift"}
@@ -224,6 +224,7 @@ forms:
     required_slots:
     - email
     - priority
+    - stand
     - problem_description
     - incident_title
     - confirm

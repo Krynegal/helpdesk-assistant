@@ -19,6 +19,7 @@ rules:
     steps:
     - or:
       - intent: open_incident
+      - intent: stand_troubles
       - intent: password_reset
       - intent: problem_email
     - action: open_incident_form

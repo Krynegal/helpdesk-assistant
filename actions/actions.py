@@ -108,6 +108,8 @@ class ActionOpenIncident(Action):
         """
 
         priority = tracker.get_slot("priority")
+        stand = tracker.get_slot("stand")
+        print(stand)
         email = tracker.get_slot("email")
         problem_description = tracker.get_slot("problem_description")
         incident_title = tracker.get_slot("incident_title")

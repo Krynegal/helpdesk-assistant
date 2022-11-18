@@ -3,6 +3,7 @@ session_config:
   session_expiration_time: 0.0
   carry_over_slots_to_new_session: true
 intents:
+- stand_troubles
 - greet
 - goodbye
 - bot_challenge
@@ -24,8 +25,19 @@ intents:
 entities:
 - email
 - priority
+#- stand
 - handoff_to
 slots:
+#  stand:
+#    type: text
+#    influence_conversation: false
+#    mappings:
+#      - type: from_entity
+#        entity: stand
+#        conditions:
+#          - active_loop: open_incident_form
+#      - type: from_entity
+#        entity: stand
   confirm:
     type: bool
     influence_conversation: false
@@ -143,6 +155,15 @@ slots:
     - type: from_entity
       entity: handoff_to
 responses:
+  utter_stand_troubles:
+    - text: Which stand is the problem with?
+      buttons:
+        - payload: /inform{"stand":"ift"}
+          title: IFT
+        - payload: /inform{"stand":"uat"}
+          title: UAT
+        - payload: /inform{"stand":"prod"}
+          title: PROD
   utter_out_of_scope:
   - text: Sorry, I'm not sure how to respond to that. Type "help" for assistance.
   utter_greet:

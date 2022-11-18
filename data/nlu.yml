@@ -1,5 +1,12 @@
 version: "3.0"
 nlu:
+- intent: stand_troubles
+  examples: |
+    - stand fell down
+    - stand died
+    - problem with stand
+    - stand doesn't work
+    - smth wrong with stand
 - intent: greet
   examples: |
     - hey

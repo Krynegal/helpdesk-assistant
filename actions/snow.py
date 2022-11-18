@@ -127,3 +127,9 @@ class SnowAPI(object):
         """Database of supported priorities"""
         priorities = {"low": 3, "medium": 2, "high": 1}
         return priorities
+
+    # @staticmethod
+    # def stand_db() -> Dict[str, int]:
+    #     """Database of supported stands"""
+    #     stands = {"ift": 3, "uat": 2, "prod": 1}
+    #     return stands

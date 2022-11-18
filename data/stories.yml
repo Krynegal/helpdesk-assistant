@@ -1,6 +1,11 @@
 version: "3.0"
 stories:
 
+- story: stand fell down
+  steps:
+  - intent: stand_troubles
+  - action: utter_stand_troubles
+
 - story: answer out of scope
   steps:
   - intent: out_of_scope

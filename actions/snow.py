@@ -127,3 +127,34 @@ class SnowAPI(object):
         """Database of supported priorities"""
         priorities = {"low": 3, "medium": 2, "high": 1}
         return priorities
+
+    def create_fallen_stand_incident(
+            self, description, short_description, priority, email, stand
+    ) -> Dict[Text, Any]:
+        result = self.email_to_sysid(email)
+        caller_id = result.get("caller_id")
+        if caller_id:
+            incident_url = f"{self.base_api_url}/table/incident"
+            data = {
+                "opened_by": caller_id,
+                "short_description": short_description,
+                "description": description,
+                "stand": stand,
+                "urgency": priority,
+                "caller_id": caller_id,
+                "comments": description,
+            }
+            request_args = {
+                "url": incident_url,
+                "auth": (self.snow_user, self.snow_pw),
+                "headers": json_headers,
+                "data": json.dumps(data),
+            }
+            result = self.handle_request(requests.post, request_args)
+        return result
+
+    @staticmethod
+    def stand_db() -> Dict[str, int]:
+        """Database of supported stands"""
+        stands = {"IFT": 3, "UAT": 2, "PROD": 1}
+        return stands

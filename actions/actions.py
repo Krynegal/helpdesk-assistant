@@ -7,7 +7,6 @@ from rasa_sdk.events import AllSlotsReset, SlotSet
 from actions.snow import SnowAPI
 import random
 
-
 logger = logging.getLogger(__name__)
 vers = "vers: 0.1.0, date: Apr 2, 2020"
 logger.debug(vers)
@@ -22,23 +21,23 @@ class ActionAskEmail(Action):
         return "action_ask_email"
 
     def run(
-        self,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: Dict[Text, Any],
+            self,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any],
     ) -> List[Dict]:
         if tracker.get_slot("previous_email"):
-            dispatcher.utter_message(template=f"utter_ask_use_previous_email",)
+            dispatcher.utter_message(template=f"utter_ask_use_previous_email", )
         else:
             dispatcher.utter_message(template=f"utter_ask_email")
         return []
 
 
 def _validate_email(
-    value: Text,
-    dispatcher: CollectingDispatcher,
-    tracker: Tracker,
-    domain: Dict[Text, Any],
+        value: Text,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
 ) -> Dict[Text, Any]:
     """Validate email is in ticket system."""
     if not value:
@@ -67,21 +66,21 @@ class ValidateOpenIncidentForm(FormValidationAction):
         return "validate_open_incident_form"
 
     def validate_email(
-        self,
-        value: Text,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: Dict[Text, Any],
+            self,
+            value: Text,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any],
     ) -> Dict[Text, Any]:
         """Validate email is in ticket system."""
         return _validate_email(value, dispatcher, tracker, domain)
 
     def validate_priority(
-        self,
-        value: Text,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: Dict[Text, Any],
+            self,
+            value: Text,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any],
     ) -> Dict[Text, Any]:
         """Validate priority is a valid value."""
 
@@ -97,10 +96,10 @@ class ActionOpenIncident(Action):
         return "action_open_incident"
 
     def run(
-        self,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: Dict[Text, Any],
+            self,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any],
     ) -> List[Dict]:
         """Create an incident and return details or
         if localmode return incident details as if incident
@@ -151,16 +150,80 @@ class ActionOpenIncident(Action):
         return [AllSlotsReset(), SlotSet("previous_email", email)]
 
 
+class ActionFallenStandIncident(Action):
+    def name(self) -> Text:
+        return "action_fallen_stand_incident"
+
+    def run(
+            self,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any],
+    ) -> List[Dict]:
+        """Create an incident and return details or
+        if localmode return incident details as if incident
+        was created
+        """
+
+        priority = "high"
+        stand = tracker.get_slot("stand")
+        email = tracker.get_slot("email")
+        problem_description = f"Stand {stand} does not work or not available"
+        incident_title = f"{stand} stand died"
+        confirm = tracker.get_slot("stand_confirm")
+        if not confirm:
+            dispatcher.utter_message(
+                template="utter_incident_creation_canceled"
+            )
+            return [AllSlotsReset(), SlotSet("previous_email", email)]
+
+        if localmode:
+            message = (
+                f"An incident with the following details would be opened "
+                f"if ServiceNow was connected:\n"
+                f"email: {email}\n"
+                f"stand: {stand}\n"
+                f"priority: {priority}\n"
+                f"title: {incident_title}\n"
+                f"problem description: {problem_description}\n"
+            )
+        else:
+            snow_priority = snow.priority_db().get(priority)
+            snow_stand = snow.stand_db().get(stand)
+            response = snow.create_fallen_stand_incident(
+                description=problem_description,
+                short_description=incident_title,
+                priority=snow_priority,
+                stand=snow_stand,
+                email=email,
+            )
+            incident_number = (
+                response.get("content", {}).get("result", {}).get("number")
+            )
+            if incident_number:
+                message = (
+                    f"Successfully opened up incident {incident_number} "
+                    f"for you. Someone will reach out soon."
+                )
+            else:
+                message = (
+                    f"Something went wrong while opening an incident for you. "
+                    f"{response.get('error')}"
+                )
+        dispatcher.utter_message(message)
+        return [AllSlotsReset(), SlotSet("previous_email", email)]
+
+
 class IncidentStatusForm(FormValidationAction):
     def name(self) -> Text:
         return "validate_incident_status_form"
 
     def validate_email(
-        self,
-        value: Text,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: Dict[Text, Any],
+            self,
+            value: Text,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any],
     ) -> Dict[Text, Any]:
         """Validate email is in ticket system."""
         return _validate_email(value, dispatcher, tracker, domain)
@@ -171,10 +234,10 @@ class ActionCheckIncidentStatus(Action):
         return "action_check_incident_status"
 
     def run(
-        self,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: Dict[Text, Any],
+            self,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any],
     ) -> List[Dict]:
         """Look up all incidents associated with email address
            and return status of each"""

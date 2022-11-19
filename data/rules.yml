@@ -19,11 +19,24 @@ rules:
     steps:
     - or:
       - intent: open_incident
-      - intent: stand_troubles
       - intent: password_reset
       - intent: problem_email
     - action: open_incident_form
     - active_loop: open_incident_form
+
+  - rule: start open fallen stand form
+    steps:
+      - intent: stand_troubles
+      - action: open_fallen_stand_form
+      - active_loop: open_fallen_stand_form
+
+  - rule: submit open fallen stand form
+    condition:
+      - active_loop: open_fallen_stand_form
+    steps:
+      - action: open_fallen_stand_form
+      - active_loop: null
+      - action: action_fallen_stand_incident
 
   - rule: submit open incident form
     condition:

@@ -28,6 +28,22 @@ entities:
 - stand
 - handoff_to
 slots:
+  stand_confirm:
+    type: bool
+    influence_conversation: false
+    mappings:
+    - type: from_intent
+      intent: affirm
+      value: true
+      conditions:
+      - active_loop: open_fallen_stand_form
+        requested_slot: stand_confirm
+    - type: from_intent
+      intent: deny
+      value: false
+      conditions:
+      - active_loop: open_fallen_stand_form
+        requested_slot: stand_confirm
   confirm:
     type: bool
     influence_conversation: false
@@ -123,12 +139,12 @@ slots:
     type: text
     influence_conversation: false
     mappings:
-      - type: from_entity
-        entity: stand
-        conditions:
-          - active_loop: open_incident_form
-      - type: from_entity
-        entity: stand
+    - type: from_entity
+      entity: stand
+      conditions:
+      - active_loop: open_fallen_stand_form
+    - type: from_entity
+      entity: stand
   problem_description:
     type: text
     influence_conversation: false
@@ -156,14 +172,14 @@ slots:
       entity: handoff_to
 responses:
   utter_ask_stand:
-    - text: Which stand is the problem with?
-      buttons:
-        - payload: /inform{"stand":"ift"}
-          title: IFT
-        - payload: /inform{"stand":"uat"}
-          title: UAT
-        - payload: /inform{"stand":"prod"}
-          title: PROD
+  - text: Which stand is the problem with?
+    buttons:
+    - payload: /inform{"stand":"IFT"}
+      title: IFT
+    - payload: /inform{"stand":"UAT"}
+      title: UAT
+    - payload: /inform{"stand":"PROD"}
+      title: PROD
   utter_out_of_scope:
   - text: Sorry, I'm not sure how to respond to that. Type "help" for assistance.
   utter_greet:
@@ -199,6 +215,13 @@ responses:
   - text: I didn't quite understand that. Could you rephrase?
   utter_ask_use_previous_email:
   - text: Would you like to use the last email address you used, {previous_email}?
+  utter_ask_stand_confirm:
+  - text: "Should I open an incident with the following details? \n    email: {email} \n    stand: {stand}"
+    buttons:
+    - title: Yes
+      payload: /affirm
+    - title: No
+      payload: /deny
   utter_ask_confirm:
   - text: "Should I open an incident with the following details? \n    email: {email} \n    problem description: {problem_description} \n    title: {incident_title} \n    priority: {priority}"
     buttons:
@@ -219,12 +242,17 @@ responses:
   utter_no_handoff:
   - text: Since you haven't configured a host to hand off to, I can't send you anywhere!
 forms:
+  open_fallen_stand_form:
+    ignored_intents: [ ]
+    required_slots:
+    - email
+    - stand
+    - stand_confirm
   open_incident_form:
     ignored_intents: []
     required_slots:
     - email
     - priority
-    - stand
     - problem_description
     - incident_title
     - confirm
@@ -238,5 +266,6 @@ actions:
 - action_handoff
 - action_handoff_options
 - action_open_incident
+- action_fallen_stand_incident
 - validate_open_incident_form
 - validate_incident_status_form
